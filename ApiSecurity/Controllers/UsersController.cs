@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ApiSecurity.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+
 public class UsersController : ControllerBase
 {
     //IConfiguration - ability, a system that allows us to talk to app settings.json, sets up in createbuilder
@@ -23,13 +25,14 @@ public class UsersController : ControllerBase
 
     // GET api/<UsersController>/5
     [HttpGet("{id}")]
+    [Authorize(Policy = "MustHaveEmployeeId")]
     public string Get(int id)
     {
         return _config.GetConnectionString("Default");
     }
 
     // POST api/<UsersController>
-    [HttpPost]
+    [HttpPost] 
     public void Post([FromBody] string value)
     {
     }

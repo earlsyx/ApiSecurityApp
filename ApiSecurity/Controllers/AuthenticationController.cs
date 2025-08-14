@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -24,9 +25,10 @@ public class AuthenticationController : ControllerBase
         this._config = config;
     }
     public record AuthenticationData(string? Username, string? Password);
-    public record UserData(int UserId, string UserName);
+    public record UserData(int UserId, string UserName, string Title, string EmployeeId);
     // api/Authentication/token
     [HttpPost("token")]
+    [AllowAnonymous] 
     public ActionResult<string> Authenticate([FromBody] AuthenticationData data)
     {
         //validate creds.
@@ -63,6 +65,8 @@ public class AuthenticationController : ControllerBase
         List<Claim> claims = new();
         claims.Add(new(JwtRegisteredClaimNames.Sub, user.UserId.ToString())); //way to identify the user    //standard claim that add to a claim file, in token we can have standard claim and custom claim. indsutry stanrard , expected.  subject-what identifies the user
         claims.Add(new(JwtRegisteredClaimNames.UniqueName, user.UserName)); //standard one unique name. 
+        claims.Add(new("title", user.Title)); 
+        claims.Add(new("employeeId", user.EmployeeId)); 
 
         //build a token
 
@@ -85,13 +89,13 @@ public class AuthenticationController : ControllerBase
         if (CompareValues(data.Username, "tcorey") &&
             CompareValues(data.Password, "Test123"))
         {
-            return new UserData(1, data.Username!);
+            return new UserData(1, data.Username!, "Business Owner", "E001");
         }
 
         if (CompareValues(data.Username, "sstorm") &&
           CompareValues(data.Password, "Test123"))
         {
-            return new UserData(2, data.Username!);
+            return new UserData(2, data.Username!, "Head of Security", "E005");
         }
 
         return null;
